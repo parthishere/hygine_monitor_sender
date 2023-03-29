@@ -16,10 +16,9 @@ uint16_t distance=0;
 bool decreased=false, increased=true;
 
 typedef struct struct_message {
-  int id;
-  float temp;
-  float hum;
-  int readingId;
+  int distance_1_cm;
+  int distance_2_cm;
+  int direction;
 } struct_message;
 struct_message myData;
 
@@ -88,13 +87,9 @@ void loop() {
     saved_distance = distance;
   }
   if((distance - saved_distance) > 500 && decreased==true){
-    
-
-    myData.id = BOARD_ID;
-    myData.temp = 10;
-    myData.hum = 10;
-    
-    
+    myData.distance_1_cm = distance;
+    myData.distance_2_cm = 10;
+    myData.direction = 0;
     esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *)&myData, sizeof(myData));
     if (result == ESP_OK) {
       Serial.println("Sent with success");

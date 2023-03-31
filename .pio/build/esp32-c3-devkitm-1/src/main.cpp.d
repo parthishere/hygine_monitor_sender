@@ -156,6 +156,17 @@
  /home/parthishere/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32c3/include/spi_flash/include/esp_spi_flash.h \
  /home/parthishere/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32c3/include/spi_flash/include/esp_spi_flash_counters.h \
  /home/parthishere/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32c3/include/esp_hw_support/include/soc/esp32/spiram.h \
+ .pio/libdeps/esp32-c3-devkitm-1/Adafruit_VL53L0X/src/Adafruit_VL53L0X.h \
+ /home/parthishere/.platformio/packages/framework-arduinoespressif32/libraries/Wire/src/Wire.h \
+ /home/parthishere/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal.h \
+ .pio/libdeps/esp32-c3-devkitm-1/Adafruit_VL53L0X/src/vl53l0x_api.h \
+ .pio/libdeps/esp32-c3-devkitm-1/Adafruit_VL53L0X/src/vl53l0x_api_strings.h \
+ .pio/libdeps/esp32-c3-devkitm-1/Adafruit_VL53L0X/src/vl53l0x_def.h \
+ .pio/libdeps/esp32-c3-devkitm-1/Adafruit_VL53L0X/src/vl53l0x_device.h \
+ .pio/libdeps/esp32-c3-devkitm-1/Adafruit_VL53L0X/src/vl53l0x_types.h \
+ .pio/libdeps/esp32-c3-devkitm-1/Adafruit_VL53L0X/src/vl53l0x_platform.h \
+ .pio/libdeps/esp32-c3-devkitm-1/Adafruit_VL53L0X/src/vl53l0x_i2c_platform.h \
+ .pio/libdeps/esp32-c3-devkitm-1/Adafruit_VL53L0X/src/vl53l0x_platform_log.h \
  /home/parthishere/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32c3/include/esp_wifi/include/esp_now.h \
  /home/parthishere/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32c3/include/esp_wifi/include/esp_wifi_types.h \
  /home/parthishere/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32c3/include/esp_wifi/include/esp_wifi.h \

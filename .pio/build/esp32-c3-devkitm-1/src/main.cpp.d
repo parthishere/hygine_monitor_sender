@@ -193,4 +193,5 @@
  /home/parthishere/.platformio/packages/framework-arduinoespressif32/cores/esp32/Server.h \
  /home/parthishere/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src/WiFiUdp.h \
  /home/parthishere/.platformio/packages/framework-arduinoespressif32/cores/esp32/Udp.h \
- /home/parthishere/.platformio/packages/framework-arduinoespressif32/cores/esp32/cbuf.h
+ /home/parthishere/.platformio/packages/framework-arduinoespressif32/cores/esp32/cbuf.h \
+ /home/parthishere/.platformio/packages/framework-arduinoespressif32/libraries/EEPROM/src/EEPROM.h

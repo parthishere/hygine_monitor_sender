@@ -36,11 +36,11 @@ uint8_t broadcastAddress[] = {0xE0, 0x5A, 0x1B, 0x75, 0xDF, 0x70};
 
 constexpr char WIFI_SSID[] = "parth";
 int pin = 4, count = 0;
-unsigned long duration, saved_distance_1{0}, saved_distance_2{0};
+unsigned long duration, saved_distance_1{8190}, saved_distance_2{8190};
 uint16_t distance = 0;
 bool decreased = false, increased = true;
 String esid;
-bool direction_in;
+bool direction_in{false}, phase_one_for_in{false}, phase_two_for_in{}, phase_one_for_out{}, phase_two_for_out{};
 
 typedef struct struct_message
 {
@@ -52,7 +52,7 @@ struct_message myData;
 
 typedef struct ssid_send
 {
-  const char *ssid;
+  String ssid;
 } ssid_send;
 ssid_send SsidRecieved;
 
@@ -91,12 +91,9 @@ void OnDataRecv(const uint8_t *mac_addr, const uint8_t *incomingData, int len)
   memcpy(&SsidRecieved, incomingData, sizeof(SsidRecieved));
 
   Serial.println("This is ssid");
-  Serial.printf(SsidRecieved.ssid);
-  
-  const char* qsid = SsidRecieved.ssid;
-  Serial.println(qsid);
-  Serial.print("before eeprom");
-  if (strlen(qsid) > 0)
+  String qsid = SsidRecieved.ssid;
+
+  if (qsid.length() > 0)
   {
     Serial.print("In eeprom");
     Serial.println("clearing eeprom");
@@ -107,7 +104,7 @@ void OnDataRecv(const uint8_t *mac_addr, const uint8_t *incomingData, int len)
     Serial.println(qsid);
     Serial.println("");
     Serial.println("writing eeprom ssid:");
-    for (int i = 0; i < strlen(qsid); ++i)
+    for (int i = 0; i < qsid.length(); ++i)
     {
       EEPROM.write(i, qsid[i]);
       Serial.print("Wrote: ");
@@ -189,64 +186,131 @@ void setup()
   delay(500);
 }
 
+long t1 = 0;
+long t2 = 0;
+
 void loop()
 {
-  lox1.rangingTest(&measure1, false); // pass in 'true' to get debug data printout!
+  lox1.rangingTest(&measure1, false); 
   lox2.rangingTest(&measure2, false); // pass in 'true' to get debug data printout!
 
   // print sensor one reading
-  Serial.print(F("1: "));
-  if (measure1.RangeStatus != 4)
-  { // if not out of range
-    Serial.print(measure1.RangeMilliMeter);
-  }
-  else
-  {
-    Serial.print(F("Out of range"));
-  }
+  // Serial.print(F("1: "));
+  // Serial.print(measure1.RangeMilliMeter);
+  // Serial.print(F(" "));
 
-  Serial.print(F(" "));
-
-  // print sensor two reading
-  Serial.print(F("2: "));
-  if (measure2.RangeStatus != 4)
-  {
-    Serial.print(measure2.RangeMilliMeter);
-  }
-  else
-  {
-    Serial.print(F("Out of range"));
-  }
+  // // print sensor two reading
+  // Serial.print(F("2: "));
+  // Serial.print(measure2.RangeMilliMeter);
+  // Serial.println();
 
   myData.distance_1_mm = measure1.RangeMilliMeter;
   myData.distance_2_mm = measure2.RangeMilliMeter;
-  if(saved_distance_1 - myData.distance_1_mm > 500){
-    if(saved_distance_2 - myData.distance_2_mm < 100){
-      direction_in = true;
-    }
-    saved_distance_1 = myData.distance_1_mm;
-    saved_distance_2 = myData.distance_2_mm;
-  }
-  if(saved_distance_2 - myData.distance_2_mm > 500){
-    if(saved_distance_1 - myData.distance_1_mm < 100){
-      direction_in = true;
-    }
-    saved_distance_1 = myData.distance_1_mm;
-    saved_distance_2 = myData.distance_2_mm;
-  }
-  
-  esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *)&myData, sizeof(myData));
-  if (result == ESP_OK)
+  if (myData.distance_1_mm < 2000)
   {
-    Serial.println("Sent with success");
+    t1 = millis();
   }
-  else
+  else if (myData.distance_2_mm < 2000)
   {
-    Serial.println("Error sending the data");
+    t2 = millis();
   }
-  Serial.println();
+  if (t1 > 0 && t2 > 0)
+  {
+    if (t1 < t2)
+    {
 
-  delay(1000);
+      phase_one_for_in = true;
+      phase_one_for_out = false;
+    }
+    else if (t2 < t1)
+    {
+
+      phase_one_for_out = true;
+      phase_one_for_in = false;
+    }
+    else
+    {
+      Serial.println("");
+    }
+
+    t1 = 0;
+    t2 = 0;
+  }
+  if (myData.distance_1_mm > myData.distance_2_mm && phase_one_for_in && !phase_one_for_out)
+  {
+    Serial.println("in");
+    phase_one_for_in = false;
+    phase_one_for_out = false;
+    myData.direction = 1;
+    esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *)&myData, sizeof(myData));
+    t1 = 0;
+    t2 = 0;
+  }
+  if (myData.distance_1_mm < myData.distance_2_mm && phase_one_for_out && !phase_one_for_in)
+  {
+    Serial.println("out");
+    phase_one_for_out = false;
+    phase_one_for_in = false;
+    phase_one_for_out = false;
+    myData.direction = 0;
+    esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *)&myData, sizeof(myData));
+    t1 = 0;
+    t2 = 0;
+  }
+
+  // if((saved_distance_1 - myData.distance_1_mm) > 1000 && (saved_distance_2 - myData.distance_2_mm) < 500){
+  //   if (phase_one_for_out == true && t1 < t2){
+  //     direction_in = false;
+  //     phase_one_for_out = false;
+  //     Serial.println("Direction out");
+  //     t1=0;
+  //     t2=0;
+  //   }
+
+  //   phase_one_for_in = true;
+  //   saved_distance_1 = myData.distance_1_mm;
+  //   saved_distance_2 = myData.distance_2_mm;
+  // }
+  // if (saved_distance_2 - myData.distance_2_mm > 100  && saved_distance_1 - myData.distance_1_mm < 500){
+  //   if (phase_one_for_in == true){
+  //     phase_two_for_in = true;
+  //     phase_one_for_in = false;
+
+  //   }
+
+  //   if (phase_one_for_out == true){
+  //     phase_two_for_out = true;
+  //     phase_one_for_out = false;
+
+  //   }
+  // }
+  // if (saved_distance_2 - myData.distance_2_mm > 4000  && saved_distance_1 - myData.distance_1_mm < 100){
+  //   if (phase_one_for_in == true && t1 > t2){
+  //     direction_in = true;
+  //     phase_one_for_in = false;
+  //     Serial.println("Direction in");
+  //     t1=0;
+  //     t2=0;
+  //   }
+
+  //   phase_one_for_out = true;
+
+  //   saved_distance_1 = myData.distance_1_mm;
+  //   saved_distance_2 = myData.distance_2_mm;
+  // }
+
+  // esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *)&myData, sizeof(myData));
+  // if (result == ESP_OK)
+  // {
+  //   Serial.println("Sent with success");
+  // }
+  // else
+  // {
+  //   Serial.println("Error sending the data");
+  // }
+  // Serial.println();
+
+  // delay(1000);
 }
 
 void setID()

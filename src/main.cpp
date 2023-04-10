@@ -76,18 +76,14 @@ int32_t getWiFiChannel(const char *ssid)
 
 void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status)
 {
-  // Serial.print("\r\nLast Packet Send Status:\t");
-  // Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Delivery Success" : "Delivery Fail");
+
 }
 
 void OnDataRecv(const uint8_t *mac_addr, const uint8_t *incomingData, int len)
 {
   // Copies the sender mac address to a string
   char macStr[18];
-  Serial.print("Packet received from: ");
-  snprintf(macStr, sizeof(macStr), "%02x:%02x:%02x:%02x:%02x:%02x",
-           mac_addr[0], mac_addr[1], mac_addr[2], mac_addr[3], mac_addr[4], mac_addr[5]);
-  Serial.println(macStr);
+  
   memcpy(&SsidRecieved, incomingData, sizeof(SsidRecieved));
 
   Serial.println("This is ssid");
@@ -95,8 +91,7 @@ void OnDataRecv(const uint8_t *mac_addr, const uint8_t *incomingData, int len)
 
   if (qsid.length() > 0)
   {
-    Serial.print("In eeprom");
-    Serial.println("clearing eeprom");
+    
     for (int i = 0; i < 96; ++i)
     {
       EEPROM.write(i, 0);
@@ -127,11 +122,7 @@ void setup()
   EEPROM.begin(512);
   delay(10);
 
-  Serial.println();
-  Serial.println();
-  Serial.println("Startup");
-
-  Serial.println("Reading EEPROM ssid");
+  
   for (int i = 0; i < 32; ++i)
   {
     esid += char(EEPROM.read(i));
@@ -194,15 +185,7 @@ void loop()
   lox1.rangingTest(&measure1, false); 
   lox2.rangingTest(&measure2, false); // pass in 'true' to get debug data printout!
 
-  // print sensor one reading
-  // Serial.print(F("1: "));
-  // Serial.print(measure1.RangeMilliMeter);
-  // Serial.print(F(" "));
 
-  // // print sensor two reading
-  // Serial.print(F("2: "));
-  // Serial.print(measure2.RangeMilliMeter);
-  // Serial.println();
 
   myData.distance_1_mm = measure1.RangeMilliMeter;
   myData.distance_2_mm = measure2.RangeMilliMeter;

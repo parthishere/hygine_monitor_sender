@@ -332,7 +332,3 @@ void setID()
       ;
   }
 }
-
-void read_dual_sensors()
-{
-}
